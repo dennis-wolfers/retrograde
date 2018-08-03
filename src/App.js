@@ -21,7 +21,7 @@ class App extends Component {
         "http://www.astro-phys.com/api/de406/states?date=1000-1-20&bodies=mars"
       )
       .then(res => {
-        console.log(res.data.results.mars[0][0]);
+        console.log(res.data.results.mars);
         this.setState({
           x: res.data.results.mars[0][0],
           y: res.data.results.mars[0][1],
@@ -31,32 +31,40 @@ class App extends Component {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
     const scene = new THREE.Scene();
-    let hemiLight;
-    hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
-    hemiLight.color.setHSL(0.6, 1, 0.6);
-    hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-    hemiLight.position.set(0, 50, 0);
-    scene.add(hemiLight);
-    let hemiLightHelper;
-    hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
-    scene.add(hemiLightHelper);
+    // let hemiLight;
+    // hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+    // hemiLight.color.setHSL(0.6, 1, 0.6);
+    // hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+    // hemiLight.position.set(0, 50, 0);
+    // scene.add(hemiLight);
+    // let hemiLightHelper;
+    // hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
+    // scene.add(hemiLightHelper);
+    var light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(50, 50, 50);
+    light.castShadow = true; // default false
+    //scene.add(light);
+
+    //Set up shadow properties for the light
+    light.shadow.mapSize.width = 512; // default
+    light.shadow.mapSize.height = 512; // default
+    light.shadow.camera.near = 0.5; // default
+    light.shadow.camera.far = 500;
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.controls = new TrackballControls(camera);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    const geometry = new THREE.SphereGeometry(
-      this.state.x,
-      this.state.y,
-      this.state.z
-    );
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const geometry = new THREE.SphereGeometry(this.state.x, 32, 32);
     scene.add(this.mesh);
     const cube = new THREE.Mesh(
       geometry,
-      new THREE.MeshNormalMaterial({ overdraw: 0.5 })
+      new THREE.MeshBasicMaterial({ color: 0xffff00 })
     );
     camera.position.z = 20;
     scene.add(cube);
     renderer.setClearColor("#CEDFF0");
-    renderer.setSize(width, height);
+    renderer.setSize(1000, 1000);
 
     this.scene = scene;
     this.camera = camera;
